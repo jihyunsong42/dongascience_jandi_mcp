@@ -92,6 +92,24 @@ jandi_get_messages roomId="31403834" count=10
 jandi_get_comments postId="4836099780" count=5
 ```
 
+## 개발 및 테스트
+
+코드 수정 후 테스트할 때는 MCP 서버가 아닌 직접 서버를 실행하여 테스트합니다.
+
+```bash
+# 빌드
+npm run build
+
+# 직접 실행하여 테스트
+node dist/index.js
+```
+
+MCP Inspector를 사용하여 테스트할 수도 있습니다:
+
+```bash
+npx @anthropic/mcp-inspector node dist/index.js
+```
+
 ## 주의사항
 
 - JWT 토큰은 만료됩니다. 401 오류 발생 시 토큰을 새로 추출하세요.

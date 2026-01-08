@@ -3,6 +3,7 @@ import type {
   RoomsResponse,
   MessagesResponse,
   CommentsResponse,
+  MembersResponse,
 } from "./types.js";
 
 const BASE_URL = "https://i1.jandi.com";
@@ -94,6 +95,54 @@ export class JandiClient {
     }
 
     return response.json() as Promise<CommentsResponse>;
+  }
+
+  async getMembers(): Promise<MembersResponse> {
+    const url = `${BASE_URL}/start-api/v4/teams/${this.config.teamId}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        ...this.getBaseHeaders(),
+        Accept: "application/vnd.tosslab.jandi-v4+json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get members: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<MembersResponse>;
+  }
+
+  async downloadImage(
+    imageUrl: string,
+  ): Promise<{ base64: string; mimeType: string } | null> {
+    try {
+      const response = await fetch(imageUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `bearer ${this.config.accessToken}`,
+          "x-team-id": this.config.teamId,
+          "x-member-id": this.config.memberId,
+          "x-account-id": this.config.accountId,
+        },
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      const mimeType = response.headers.get("content-type") || "image/png";
+
+      return { base64, mimeType };
+    } catch {
+      return null;
+    }
   }
 }
 

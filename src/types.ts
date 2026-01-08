@@ -63,3 +63,19 @@ export interface CommentsResponse {
   records?: Comment[];
   [key: string]: unknown;
 }
+
+export interface Member {
+  id: number;
+  name: string;
+  email?: string;
+  profileImageUrl?: string;
+  department?: string;
+  position?: string;
+  status?: string;
+}
+
+export interface MembersResponse {
+  members?: Member[];
+  records?: Member[];
+  [key: string]: unknown;
+}
