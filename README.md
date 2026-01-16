@@ -13,25 +13,55 @@ npm run build
 
 `.env.example`을 복사하여 `.env` 파일을 생성하고 값을 채워주세요.
 
+### 방법 1: 이메일/비밀번호 로그인 (권장)
+
 ```env
-JANDI_ACCESS_TOKEN=your_jwt_token_here
-JANDI_TEAM_ID=your_team_id
-JANDI_MEMBER_ID=your_member_id
-JANDI_ACCOUNT_ID=your_account_id
+JANDI_EMAIL=your_email@example.com
+JANDI_PASSWORD=your_password
 ```
 
-### 토큰 추출 방법
+MCP 서버가 시작될 때 headless 브라우저로 자동 로그인하여 토큰을 획득합니다.
+
+### 방법 2: Refresh Token 직접 설정
+
+```env
+JANDI_REFRESH_TOKEN=your_refresh_token_here
+```
+
+Refresh token을 수동으로 추출하여 설정하는 방법입니다.
+
+#### Refresh Token 추출 방법
 
 1. 브라우저에서 `jandi.com` 접속 후 로그인
 2. F12 → Network 탭 열기
 3. 아무 API 요청 클릭 → Headers 탭
-4. 다음 값들을 복사:
-   - `authorization` 헤더에서 `bearer ` 뒤의 토큰
-   - `x-team-id`, `x-member-id`, `x-account-id` 값
+4. Response 탭에서 `refresh_token` 값 복사
+
+> **참고**: 이메일/비밀번호 방식을 사용하면 토큰 갱신이 자동으로 처리됩니다.
 
 ## Claude Desktop 설정
 
 `%APPDATA%\Claude\claude_desktop_config.json` 파일에 추가:
+
+### 방법 A: npm link 사용 (권장)
+
+프로젝트 디렉토리에서 `npm link`를 실행한 후:
+
+```json
+{
+  "mcpServers": {
+    "jandi": {
+      "command": "jandi-mcp",
+      "env": {
+        "JANDI_EMAIL": "your_email@example.com",
+        "JANDI_PASSWORD": "your_password"
+      }
+    }
+  }
+}
+```
+
+### 방법 B: 직접 경로 지정
 
 ```json
 {
@@ -40,10 +70,24 @@ JANDI_ACCOUNT_ID=your_account_id
       "command": "node",
       "args": ["C:\\Users\\dev\\Desktop\\dsstore\\dongascience_jandi_mcp\\dist\\index.js"],
       "env": {
-        "JANDI_ACCESS_TOKEN": "your_token",
-        "JANDI_TEAM_ID": "your_team_id",
-        "JANDI_MEMBER_ID": "your_member_id",
-        "JANDI_ACCOUNT_ID": "your_account_id"
+        "JANDI_EMAIL": "your_email@example.com",
+        "JANDI_PASSWORD": "your_password"
+      }
+    }
+  }
+}
+```
+
+또는 refresh token을 직접 설정:
+
+```json
+{
+  "mcpServers": {
+    "jandi": {
+      "command": "node",
+      "args": ["C:\\Users\\dev\\Desktop\\dsstore\\dongascience_jandi_mcp\\dist\\index.js"],
+      "env": {
+        "JANDI_REFRESH_TOKEN": "your_refresh_token"
       }
     }
   }
@@ -92,7 +136,26 @@ jandi_get_messages roomId="31403834" count=10
 jandi_get_comments postId="4836099780" count=5
 ```
 
+## 개발 및 테스트
+
+코드 수정 후 테스트할 때는 MCP 서버가 아닌 직접 서버를 실행하여 테스트합니다.
+
+```bash
+# 빌드
+npm run build
+
+# 직접 실행하여 테스트
+node dist/index.js
+```
+
+MCP Inspector를 사용하여 테스트할 수도 있습니다:
+
+```bash
+npx @anthropic/mcp-inspector node dist/index.js
+```
+
 ## 주의사항
 
-- JWT 토큰은 만료됩니다. 401 오류 발생 시 토큰을 새로 추출하세요.
+- 이메일/비밀번호 로그인 시 첫 시작에 headless 브라우저가 실행되어 몇 초 지연될 수 있습니다.
+- 2FA(이중 인증)가 활성화된 계정은 이메일/비밀번호 로그인이 작동하지 않을 수 있습니다.
 - 비공식 API를 사용하므로 Jandi 업데이트 시 동작하지 않을 수 있습니다.
